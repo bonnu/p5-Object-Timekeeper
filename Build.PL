@@ -12,10 +12,10 @@ my $build = Module::Build->new(
     },
     configure_requires   => { 'Module::Build' => '0.38' },
     requires             => {
-        perl => '5.008005',
-        # 'Exporter'                      => '0',
-        'parent'                        => '0',
-        # 'Plack'                         => '0.9949',
+        perl          => '5.008005',
+        'parent'      => '0',
+        'Time::HiRes' => '1.9718',
+        'Text::SimpleTable' => '2.03',
     },
 
     no_index    => { 'directory' => [ 'inc' ] },
