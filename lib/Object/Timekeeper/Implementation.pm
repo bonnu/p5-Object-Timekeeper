@@ -17,9 +17,9 @@ sub new {
     $self;
 }
 
-sub checked_intervel {
-    $_[0]->{_checked_interval}
-}
+sub checked_intervel { $_[0]->{_checked_interval} }
+
+sub records { $_[0]->{_records} }
 
 sub record {
     my ($self, $name) = @_;

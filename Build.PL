@@ -7,15 +7,15 @@ my $build = Module::Build->new(
     dynamic_config       => 0,
 
     build_requires       => {
-        'Test::More' => '0.98',
+        'Test::More'     => '0.98',
         'Test::Requires' => 0,
     },
     configure_requires   => { 'Module::Build' => '0.38' },
     requires             => {
-        perl          => '5.008005',
-        'parent'      => '0',
-        'Time::HiRes' => '1.9718',
+        perl                => '5.008005',
+        'Time::HiRes'       => '1.9718',
         'Text::SimpleTable' => '2.03',
+        'Scope::Container'  => '0.04',
     },
 
     no_index    => { 'directory' => [ 'inc' ] },

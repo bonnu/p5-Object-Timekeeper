@@ -4,6 +4,7 @@ use warnings;
 use 5.008005;
 our $VERSION = '0.01';
 
+use Scope::Container;
 use Object::Timekeeper::Implementation;
 
 my ($disabled, %dummy);
@@ -22,7 +23,15 @@ use constant +{
 
 sub new { bless \(my $value), shift }
 
-sub on_your_mark { shift->new }
+sub on_your_mark {
+    my $class = shift;
+    my $tk;
+    my $scope = in_scope_container || start_scope_container;
+    unless ($tk = scope_container('Object::Timekeeper')) {
+        scope_container('Object::Timekeeper', $tk = $class->new);
+    }
+    return $tk;
+}
 
 *instance = \&Object::Timekeeper::on_your_mark;
 
