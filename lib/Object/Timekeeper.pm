@@ -7,10 +7,10 @@ our $VERSION = '0.01';
 use Scope::Container;
 use Object::Timekeeper::Implementation;
 
-my ($disabled, %dummy);
+my ($enabled, %dummy);
 
 BEGIN {
-    $disabled = $ENV{DISABLE_TIMEKEEPER};
+    $enabled = $ENV{ENABLE_TIMEKEEPER};
     %dummy = map { $_ => /(^dump|logs?$)/ ? '' : undef }
         keys %{*Object::Timekeeper::Implementation::};
     delete @dummy{qw/ new import BEGIN UNITCHECK CHECK INIT END /};
@@ -18,7 +18,7 @@ BEGIN {
 
 use constant +{
     %dummy,
-    disabled => $disabled,
+    disabled => (! $enabled),
 };
 
 sub new { bless \(my $value), shift }
@@ -35,7 +35,7 @@ sub on_your_mark {
 
 *instance = \&Object::Timekeeper::on_your_mark;
 
-unless ($disabled) {
+if ($enabled) {
     no strict 'refs';
     while (my ($sub, $code) = each %{*Object::Timekeeper::Implementation::}) {
         next if $sub =~ /^(?:BEGIN UNITCHECK CHECK INIT END|)$/;
@@ -53,6 +53,8 @@ __END__
 Object::Timekeeper - careless timekeeper for your application
 
 =head1 SYNOPSIS
+
+  BEGIN { $ENV{ENABLE_TIMEKEEPER}++ }
 
   use Object::Timekeeper;
   
@@ -81,6 +83,8 @@ Object::Timekeeper - careless timekeeper for your application
 Object::Timekeeper is careless timekeeper for your application.
 
 B<THIS IS A DEVELOPMENT RELEASE. API MAY CHANGE WITHOUT NOTICE>.
+
+The B<ENABLE_TIMEKEEPER> env variable needs to be true in order to use this module.
 
 =head1 METHODS
 

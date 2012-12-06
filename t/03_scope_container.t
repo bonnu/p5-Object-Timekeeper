@@ -1,6 +1,8 @@
 use strict;
 use Test::More;
 
+BEGIN { $ENV{ENABLE_TIMEKEEPER}++ }
+
 use Object::Timekeeper;
 
 use Scope::Container;

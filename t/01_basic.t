@@ -3,6 +3,8 @@ use Test::More;
 
 use Time::HiRes qw//;
 
+BEGIN { $ENV{ENABLE_TIMEKEEPER}++ }
+
 use Object::Timekeeper;
 
 ok my $tk = Object::Timekeeper->instance, 'create Object::Timekeeper instance';
