@@ -2,7 +2,7 @@ package Object::Timekeeper;
 use strict;
 use warnings;
 use 5.008005;
-our $VERSION = '0.01';
+our $VERSION = '0.012';
 
 use Scope::Container;
 use Object::Timekeeper::Implementation;
@@ -28,7 +28,7 @@ sub on_your_mark {
     my $tk;
     my $scope = in_scope_container || start_scope_container;
     unless ($tk = scope_container('Object::Timekeeper')) {
-        scope_container('Object::Timekeeper', $tk = $class->new);
+        scope_container('Object::Timekeeper', $tk = $class->new(_caller_depth => 2));
     }
     return $tk;
 }

@@ -8,12 +8,12 @@ use Time::HiRes qw//;
 use Text::SimpleTable;
 
 sub new {
-    my $class = shift;
+    my ($class, %args) = @_;
     my $self = bless +{
         _records => +[],
         _names   => +{},
     }, $class;
-    $self->record('[BEGINNING]');
+    $self->record('__BEGIN__', $args{_caller_depth} || 1);
     $self;
 }
 
@@ -22,10 +22,10 @@ sub checked_intervel { $_[0]->{_checked_interval} }
 sub records { $_[0]->{_records} }
 
 sub record {
-    my ($self, $name) = @_;
+    my ($self, $name, $expr) = @_;
     push @{ $self->{_records} }, +{
         # info: package, filename, line
-        info   => [ (caller 0)[0..2] ],
+        info   => [ (caller($expr || 0))[0..2] ],
         record => [ Time::HiRes::gettimeofday ],
     };
     if (defined $name) {
@@ -56,20 +56,22 @@ sub elapsed_since_previous {
 
 sub elapsed_since_beginning {
     my ($self, $time) = @_;
-    $self->elapsed_since('[BEGINNING]' => $time);
+    $self->elapsed_since('__BEGIN__' => $time);
 }
 
 sub dump_log {
-    my $self = shift;
+    my ($self, %params) = @_;
     my $records = $self->{_records};
     my %width = (
-        label     => 5,
-        package   => 7,
-        filename  => 8, 
-        line      => 4,
-        previous  => 8,
-        beginning => 9,
+        label    => 5,
+        interval => 8,
+        elapsed  => 7,
+        package  => 7,
+        filename => 8,
+        line     => 4,
     );
+    my $unit = 1;
+    $unit = 1000 if ($params{unit} || q{}) eq 'ms';
     my @rows;
     for my $index (0 .. (@{ $records } - 1)) {
         my $cur = $records->[$index];
@@ -78,26 +80,26 @@ sub dump_log {
         _update_col_length(\$width{filename}, $cur->{info}[1]);
         _update_col_length(\$width{line}, $cur->{info}[2]);
         if ($index == 0) {
-            push @rows, [ $cur->{label}, @{$cur->{info}}[0 .. 2], q{}, q{} ];
+            push @rows, [ $cur->{label}, q{}, q{}, @{$cur->{info}}[0 .. 2] ];
             next;
         }
         my $prev = $records->[$index - 1];
-        my $prev_t = sprintf '%.6f',
-            Time::HiRes::tv_interval($prev->{record}, $cur->{record});
-        _update_col_length(\$width{previous}, $prev_t);
-        my $begin_t = sprintf '%.6f',
-            Time::HiRes::tv_interval($records->[0]{record}, $cur->{record});
-        _update_col_length(\$width{beginning}, $begin_t);
+        my $interval = sprintf '%.6f',
+            Time::HiRes::tv_interval($prev->{record}, $cur->{record}) * $unit;
+        _update_col_length(\$width{interval}, $interval);
+        my $elapsed = sprintf '%.6f',
+            Time::HiRes::tv_interval($records->[0]{record}, $cur->{record}) * $unit;
+        _update_col_length(\$width{elapsed}, $elapsed);
         push @rows, [
             defined $cur->{label} ? $cur->{label} : q{},
+            $interval,
+            $elapsed,
             @{$cur->{info}}[0 .. 2],
-            $prev_t,
-            $begin_t,
         ];
     }
     my $table = Text::SimpleTable->new(
         map { [ $width{$_}, $_ ] }
-            qw/label package filename line previous beginning/,
+            qw/label interval elapsed package filename line/,
     );
     $table->row(@{ $_ }) for @rows;
     return $table->draw;

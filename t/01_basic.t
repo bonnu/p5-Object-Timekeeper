@@ -46,7 +46,7 @@ __APOLOGY__
     my $LOG_REGEX = <<__LOG_REGEX__;
 __LOG_REGEX__
 
-    like $tk->dump_log, qr{^$LOG_REGEX$}ms;
+    like $tk->dump_log(unit => 'ms'), qr{^$LOG_REGEX$}ms;
 };
 
 done_testing;
